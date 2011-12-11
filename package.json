@@ -26,7 +26,7 @@
     "dependencies" : {
         "detective" : "0.0.x",
         "deputy" : "0.0.x",
-        "resolve" : "0.1.x>=0.1.2",
+        "resolve" : "0.1.x >= 0.1.2",
         "nub" : "0.0.x",
         "commondir" : "0.0.x",
         "coffee-script" : ">=1.1.1 <1.2",
