@@ -3,6 +3,12 @@ Browserify
 
 Make node-style require() work in the browser, as if by magic!
 
+[![build status](https://secure.travis-ci.org/substack/node-browserify.png)](http://travis-ci.org/substack/node-browserify)
+
+Browserify generates a single static bundle that you can drop into your
+application with a single `<script>` tag. You can use browserify with any kind
+of web stack that can host up static files.
+
 ![browserify!](http://substack.net/images/browserify/browserify.png)
 
 Just write an `entry.js` to start with some `require()`s in it:
@@ -81,17 +87,24 @@ features at a glance
     > * require('events')
     > * require('path')
     > * require('vm')
+    > * require('http')
+    > * require('assert')
+    > * require('url')
+    > * require('buffer')
+    > * require('util')
     > * require('querystring')
 
 * lots of ways to compile
 
 * watch mode automatically recompiles your bundle when files change
 
+* debug mode for real line numbers (just subtract 2)
+
 command-line usage
 ==================
 
 ````
-Usage: browserify [entry files] {OPTIONS}
+Usage: node ./bin/cli.js [entry files] {OPTIONS}
 
 Options:
   --outfile, -o  Write the browserify bundle to this file.
@@ -105,6 +118,7 @@ Options:
   --cache, -c    Turn on caching at $HOME/.config/browserling/cache.json or use
                  a file for caching.
                                                                  [default: true]
+  --debug, -d    Switch on debugging mode with //@ sourceURL=...s.     [boolean]
   --plugin, -p   Use a plugin. Use a colon separator to specify additional
                  plugin arguments as a JSON string.
                  Example: --plugin 'fileify:["files","."]'                      
@@ -117,7 +131,6 @@ Options:
                  especially useful with --watch.                                
   --help, -h     Show this message                                              
 
-Specify a parameter.
 ````
 
 methods
@@ -141,6 +154,8 @@ script at `opts.mount` or `"/browserify.js"` if unspecified.
 * filter - registers a "post" extension using `b.register()`
 * watch - set watches on files, see below
 * cache - turn on caching for AST traversals, see below
+* debug - turn on source mapping for debugging with `//@ sourceURL=...`
+in browsers that support it
 
 If `opts` is a string, it is interpreted as a `require` value.
 
@@ -313,19 +328,40 @@ process
 
 Browserify exports a faux `process` object with these attributes:
 
-* nextTick(fn) - does setTimeout(fn, 0)
+* nextTick(fn) - uses [the postMessage trick](http://dbaron.org/log/20100309-faster-timeouts)
+    for a faster `setTimeout(fn, 0)` if it can
 * title - set to 'browser' for browser code, 'node' in regular node code
 
 require('events')
 -----------------
 
-You can `require('events').EventEmitter` just like in node.js code.
+require('assert')
+-----------------
+
+require('url')
+--------------
+
+require('buffer')
+-----------------
+
+require('buffer_ieee754')
+-------------------------
+
+require('stream')
+-----------------
 
 require('vm')
 -------------
 
 All the goodness of node's `require('vm')` has been emulated with iframe
-trickery and `eval()` hacks.
+trickery. This functionality is made available by the
+[vm-browserify](https://github.com/substack/vm-browserify) project.
+
+require('http')
+---------------
+
+Implement the client side of the node http api using the
+[http-browserify](https://github.com/substack/http-browserify) project.
 
 require('path')
 ---------------
@@ -416,3 +452,16 @@ to install into your project's node_modules directory, or if you want to use the
 command-line tool, install globally with:
 
     npm install -g browserify
+
+test
+====
+
+To run the node tests with tap, do:
+
+    npm test
+
+To run the [testling](http://testling.com) tests,
+create a [browserling](http://browserling.com) account then:
+
+    cd testling
+    ./test.sh
